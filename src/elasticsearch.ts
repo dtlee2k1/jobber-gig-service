@@ -79,7 +79,7 @@ async function updateIndexedData(indexName: string, gigId: string, gigDocument: 
   }
 }
 
-async function deleteIndexedData(indexName: string, gigId: string, gigDocument: unknown) {
+async function deleteIndexedData(indexName: string, gigId: string) {
   try {
     await elasticSearchClient.delete({
       index: indexName,
