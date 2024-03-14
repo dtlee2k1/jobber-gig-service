@@ -20,7 +20,7 @@ import gigRouter from '@gig/routes/gig.routes';
 const SERVER_PORT = 4004;
 const logger = winstonLogger(`${envConfig.ELASTIC_SEARCH_URL}`, 'GigService', 'debug');
 
-export let userChannel: Channel;
+export let gigChannel: Channel;
 
 export function start(app: Application) {
   securityMiddleware(app);
@@ -67,7 +67,7 @@ function routesMiddleware(app: Application) {
 }
 
 async function startQueues() {
-  userChannel = (await createConnection()) as Channel;
+  gigChannel = (await createConnection()) as Channel;
 }
 
 async function startElasticSearch() {
