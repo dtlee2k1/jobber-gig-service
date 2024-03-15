@@ -80,7 +80,7 @@ export async function updateGig(gigId: string, gigData: ISellerGig) {
   return updatedGig;
 }
 
-export async function updateActiveGig(gigId: string, activeGig: boolean) {
+export async function updateActiveGigProp(gigId: string, activeGig: boolean) {
   const updatedGig: ISellerGig = (await GigModel.findOneAndUpdate(
     { _id: gigId },
     { $set: { active: activeGig } },

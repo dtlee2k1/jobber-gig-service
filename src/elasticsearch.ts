@@ -1,6 +1,6 @@
 import { ISellerGig, winstonLogger } from '@dtlee2k1/jobber-shared';
 import { Client } from '@elastic/elasticsearch';
-import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
+import { CountResponse, GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import envConfig from '@gig/config';
 
 const logger = winstonLogger(`${envConfig.ELASTIC_SEARCH_URL}`, 'gigElasticSearchServer', 'debug');
@@ -55,6 +55,16 @@ async function getIndexedData(indexName: string, gigId: string) {
   }
 }
 
+async function getDocumentCount(indexName: string) {
+  try {
+    const result: CountResponse = await elasticSearchClient.count({ index: indexName });
+    return result.count;
+  } catch (error) {
+    logger.log({ level: 'error', message: `GigService elasticsearch getDocumentCount() method error: ${error}` });
+    return 0;
+  }
+}
+
 async function addDataToIndex(indexName: string, gigId: string, gigDocument: unknown) {
   try {
     await elasticSearchClient.index({
@@ -90,4 +100,13 @@ async function deleteIndexedData(indexName: string, gigId: string) {
   }
 }
 
-export { elasticSearchClient, checkConnection, createIndex, getIndexedData, addDataToIndex, updateIndexedData, deleteIndexedData };
+export {
+  elasticSearchClient,
+  checkConnection,
+  createIndex,
+  getIndexedData,
+  addDataToIndex,
+  updateIndexedData,
+  deleteIndexedData,
+  getDocumentCount
+};
