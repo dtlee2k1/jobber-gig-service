@@ -16,6 +16,7 @@ import { checkConnection, createIndex } from '@gig/elasticsearch';
 import { createConnection } from '@gig/queues/connection';
 import healthRouter from '@gig/routes/health.routes';
 import gigRouter from '@gig/routes/gig.routes';
+import { consumeGigDirectMessage, consumeSeedDirectMessages } from '@gig/queues/gig.consumer';
 
 const SERVER_PORT = 4004;
 const logger = winstonLogger(`${envConfig.ELASTIC_SEARCH_URL}`, 'GigService', 'debug');
@@ -68,6 +69,8 @@ function routesMiddleware(app: Application) {
 
 async function startQueues() {
   gigChannel = (await createConnection()) as Channel;
+  await consumeGigDirectMessage(gigChannel);
+  await consumeSeedDirectMessages(gigChannel);
 }
 
 async function startElasticSearch() {
