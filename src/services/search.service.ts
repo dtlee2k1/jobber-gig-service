@@ -124,7 +124,7 @@ export async function gigsSearchByCategories(searchQuery: string) {
   };
 }
 
-export async function getMoreSearchLikeThis(gigId: string) {
+export async function getMoreGigsLikeThis(gigId: string) {
   const result: SearchResponse = await elasticSearchClient.search({
     index: 'gigs',
     size: 5,
@@ -157,10 +157,10 @@ export async function getTopRatedGigsByCategory(searchQuery: string) {
         filter: {
           script: {
             script: {
-              source: "doc['ratingSum'].value != 0 && (doc['ratingSum'].value / doc['ratingsCount'].value === params['threshold'])",
+              source: "doc['ratingSum'].value != 0 && (doc['ratingSum'].value / doc['ratingsCount'].value >= params['threshold'])",
               lang: 'painless',
               params: {
-                threshold: 5
+                threshold: 4.5
               }
             }
           }

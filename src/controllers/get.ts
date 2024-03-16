@@ -1,5 +1,7 @@
-import { ISellerGig } from '@dtlee2k1/jobber-shared';
+import { ISearchResult, ISellerGig } from '@dtlee2k1/jobber-shared';
+import { getUserSelectedGigCategory } from '@gig/redis/gig.cache';
 import { getGigById, getSellerGigs, getSellerPausedGigs } from '@gig/services/gig.service';
+import { getMoreGigsLikeThis, getTopRatedGigsByCategory, gigsSearchByCategories } from '@gig/services/search.service';
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
@@ -24,5 +26,49 @@ export async function sellerInactiveGigs(req: Request, res: Response, _next: Nex
   res.status(StatusCodes.OK).json({
     message: 'Seller gigs',
     gigs
+  });
+}
+
+export async function topRatedGigsByCategory(req: Request, res: Response, _next: NextFunction) {
+  const category = await getUserSelectedGigCategory(`selectedCategories:${req.params.username}`);
+  const resultHits: ISellerGig[] = [];
+  const gigs: ISearchResult = await getTopRatedGigsByCategory(category);
+
+  for (const gig of gigs.hits) {
+    resultHits.push(gig._source as ISellerGig);
+  }
+
+  res.status(StatusCodes.OK).json({
+    message: 'Search top gigs results',
+    gigs: resultHits
+  });
+}
+
+export async function gigsByCategory(req: Request, res: Response, _next: NextFunction) {
+  const category = await getUserSelectedGigCategory(`selectedCategories:${req.params.username}`);
+  const resultHits: ISellerGig[] = [];
+  const gigs: ISearchResult = await gigsSearchByCategories(category);
+
+  for (const gig of gigs.hits) {
+    resultHits.push(gig._source as ISellerGig);
+  }
+
+  res.status(StatusCodes.OK).json({
+    message: 'Search gigs category results',
+    gigs: resultHits
+  });
+}
+
+export async function moreGigsLikeThis(req: Request, res: Response, _next: NextFunction) {
+  const resultHits: ISellerGig[] = [];
+  const gigs: ISearchResult = await getMoreGigsLikeThis(req.params.gigId);
+
+  for (const gig of gigs.hits) {
+    resultHits.push(gig._source as ISellerGig);
+  }
+
+  res.status(StatusCodes.OK).json({
+    message: 'Similar gigs results',
+    gigs: resultHits
   });
 }
