@@ -92,14 +92,6 @@ function errorHandler(app: Application) {
 function startServer(app: Application) {
   try {
     const httpServer = new http.Server(app);
-    startHttpServer(httpServer);
-  } catch (error) {
-    logger.log('error', 'GigService startServer() error method:', error);
-  }
-}
-
-async function startHttpServer(httpServer: http.Server) {
-  try {
     logger.info(`Gig server has started with process id ${process.pid}`);
     httpServer.listen(SERVER_PORT, () => {
       logger.info(`Gig server running on port ${SERVER_PORT}`);

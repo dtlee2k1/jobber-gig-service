@@ -28,7 +28,7 @@ gigRouter.put('/:gigId', updateGig);
 
 gigRouter.put('/active/:gigId', gigUpdateActive);
 
-gigRouter.put('/put/:count', seedGig);
+gigRouter.put('/seed/:count', seedGig);
 
 gigRouter.delete('/:gigId/:sellerId', deleteGig);
 
