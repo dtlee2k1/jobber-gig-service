@@ -1,7 +1,7 @@
 import { winstonLogger } from '@dtlee2k1/jobber-shared';
 import envConfig from '@gig/config';
 import { createConnection } from '@gig/queues/connection';
-import { updateGigReview } from '@gig/services/gig.service';
+import { seedData, updateGigReview } from '@gig/services/gig.service';
 import { Channel, ConsumeMessage } from 'amqplib';
 
 const logger = winstonLogger(`${envConfig.ELASTIC_SEARCH_URL}`, 'gigServiceConsumer', 'debug');
@@ -26,7 +26,7 @@ export async function consumeGigDirectMessage(channel: Channel) {
       channel.ack(msg!);
     });
   } catch (error) {
-    logger.log({ level: 'error', message: `UsersService UserConsumer consumeGigDirectMessage() method error: ${error}` });
+    logger.log({ level: 'error', message: `GigService GigConsumer consumeGigDirectMessage() method error: ${error}` });
   }
 }
 
@@ -44,10 +44,11 @@ export async function consumeSeedDirectMessages(channel: Channel) {
     await channel.bindQueue(jobberQueue.queue, exchangeName, routingKey);
 
     channel.consume(jobberQueue.queue, async (msg: ConsumeMessage | null) => {
-      // Use seed data function
+      const { sellers, count } = JSON.parse(msg!.content.toString());
+      await seedData(sellers, count);
       channel.ack(msg!);
     });
   } catch (error) {
-    logger.log({ level: 'error', message: `UsersService UserConsumer consumeGigDirectMessage() method error: ${error}` });
+    logger.log({ level: 'error', message: `GigService GigConsumer consumeSeedDirectMessages() method error: ${error}` });
   }
 }
