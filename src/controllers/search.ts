@@ -13,9 +13,9 @@ export async function searchGigs(req: Request, res: Response, _next: NextFunctio
   const gigs: ISearchResult = await gigsSearch(
     `${req.query.query}`,
     paginate,
-    `${req.query.delivery_time}`,
-    parseInt(`${req.query.minPrice}`),
-    parseInt(`${req.query.maxPrice}`)
+    parseInt(`${req.query.delivery_time}`),
+    parseInt(`${req.query.minprice}`),
+    parseInt(`${req.query.maxprice}`)
   );
 
   for (const gig of gigs.hits) {
