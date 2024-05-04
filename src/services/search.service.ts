@@ -32,7 +32,7 @@ export async function gigsSearchBySellerId(sellerId: string, active: boolean) {
   };
 }
 
-export async function gigsSearch(searchQuery: string, paginate: IPaginateProps, deliveryTime?: number, min?: number, max?: number) {
+export async function gigsSearch(searchQuery: string, paginate: IPaginateProps, deliveryTime?: string, min?: number, max?: number) {
   const { from, size, type } = paginate;
 
   const queryList: IQueryList[] = [
@@ -50,12 +50,11 @@ export async function gigsSearch(searchQuery: string, paginate: IPaginateProps, 
   ];
 
   // Filter by Delivery time
-  if (!isNaN(parseInt(`${deliveryTime}`))) {
+  if (deliveryTime !== 'undefined') {
     queryList.push({
-      range: {
-        expectedDelivery: {
-          lte: deliveryTime
-        }
+      query_string: {
+        fields: ['expectedDelivery'],
+        query: `*${deliveryTime}*`
       }
     });
   }
