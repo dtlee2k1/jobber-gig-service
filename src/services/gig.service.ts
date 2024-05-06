@@ -1,10 +1,9 @@
-import { IRatingTypes, IReviewMessageDetails, ISearchResult, ISellerDocument, ISellerGig } from '@dtlee2k1/jobber-shared';
+import { IRatingTypes, IReviewMessageDetails, ISellerDocument, ISellerGig } from '@dtlee2k1/jobber-shared';
 import { faker } from '@faker-js/faker';
 import { addDataToIndex, deleteIndexedData, getIndexedData, updateIndexedData } from '@gig/elasticsearch';
 import { GigModel } from '@gig/models/gig.schema';
 import { publishDirectMessage } from '@gig/queues/gig.producer';
 import { gigChannel } from '@gig/server';
-import { gigsSearchBySellerId } from '@gig/services/search.service';
 import { sample } from 'lodash';
 
 export async function getGigById(gigId: string) {
@@ -13,26 +12,13 @@ export async function getGigById(gigId: string) {
 }
 
 export async function getSellerGigs(sellerId: string) {
-  const resultHits: ISellerGig[] = [];
-
-  const gigs: ISearchResult = await gigsSearchBySellerId(sellerId, true);
-
-  for (const gig of gigs.hits) {
-    resultHits.push(gig._source as ISellerGig);
-  }
-
-  return resultHits;
+  const gigs: ISellerGig[] = await GigModel.find({ sellerId, active: true }).exec();
+  return gigs;
 }
 
 export async function getSellerPausedGigs(sellerId: string) {
-  const resultHits: ISellerGig[] = [];
-  const gigs: ISearchResult = await gigsSearchBySellerId(sellerId, false);
-
-  for (const gig of gigs.hits) {
-    resultHits.push(gig._source as ISellerGig);
-  }
-
-  return resultHits;
+  const gigs: ISellerGig[] = await GigModel.find({ sellerId, active: false }).exec();
+  return gigs;
 }
 
 export async function createGig(gig: ISellerGig) {
@@ -98,6 +84,7 @@ export async function updateActiveGigProp(gigId: string, activeGig: boolean) {
 
 export async function deleteGig(gigId: string, sellerId: string) {
   await GigModel.deleteOne({ _id: gigId }).exec();
+  await deleteIndexedData('gigs', gigId);
 
   await publishDirectMessage(
     gigChannel,
@@ -106,7 +93,6 @@ export async function deleteGig(gigId: string, sellerId: string) {
     JSON.stringify({ type: 'update-gig-count', gigSellerId: sellerId, count: -1 }),
     'Gig details sent to users service'
   );
-  await deleteIndexedData('gigs', gigId);
 }
 
 export async function updateGigReview(data: IReviewMessageDetails) {
@@ -125,8 +111,8 @@ export async function updateGigReview(data: IReviewMessageDetails) {
       $inc: {
         ratingsCount: 1,
         ratingSum: data.rating,
-        [`ratingCategories.[${ratingKey}].value`]: data.rating,
-        [`ratingCategories.[${ratingKey}].count`]: 1
+        [`ratingCategories.${ratingKey}.value`]: data.rating,
+        [`ratingCategories.${ratingKey}.count`]: 1
       }
     },
     { new: true, upsert: true }
